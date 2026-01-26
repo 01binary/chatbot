@@ -30,10 +30,7 @@ from datasets import load_dataset
 from transformers import DataCollatorForSeq2Seq
 from trl import SFTConfig, SFTTrainer
 
-tokenizer = get_chat_template(
-    tokenizer,
-    chat_template = "llama-3.1",
-)
+tokenizer = get_chat_template(tokenizer, chat_template="llama-3.1")
 
 dataset = load_dataset(
     "json",
@@ -121,42 +118,40 @@ trainer.train()
 
 from unsloth.chat_templates import get_chat_template
 
-tokenizer = get_chat_template(
-    tokenizer,
-    chat_template = "llama-3.1",
-)
-
 FastLanguageModel.for_inference(model)
 
-messages = [
-    {"role": "user", "content": "What segment comes after Mid Right Common Femoral Artery?"},
-]
+messages = [{"role": "user", "content": "What segment comes after Mid Right Common Femoral Artery?"}]
 
-inputs = tokenizer.apply_chat_template(
+input_ids = tokenizer.apply_chat_template(
     messages,
-    tokenize = True,
-    add_generation_prompt = True,
-    return_tensors = "pt",
+    tokenize=True,
+    add_generation_prompt=True,
+    return_tensors="pt",
 ).to("cuda")
 
-outputs = model.generate(
-    input_ids = inputs,
-    max_new_tokens = 64,
-    use_cache = True,
-    temperature = 1.5,
-    min_p = 0.1
+attention_mask = (input_ids != tokenizer.eos_token_id).long()
+
+output_ids = model.generate(
+    input_ids=input_ids,
+    attention_mask=attention_mask,
+    max_new_tokens=64,
+    do_sample=False,
+    temperature=0.0,
+    pad_token_id=tokenizer.eos_token_id,
+    eos_token_id=tokenizer.eos_token_id,
 )
 
-tokenizer.batch_decode(outputs)
+generated = output_ids[0, input_ids.shape[-1]:]
+print(tokenizer.decode(generated, skip_special_tokens=True))
 
 # Save model
+
+model.save_pretrained_merged("zhealth-llama3.2", tokenizer, save_method = "merged_16bit")
+
+# Push model to hub
 
 from huggingface_hub import login
 
 login()
 
-model.push_to_hub_merged(
-    "username/modelname",
-    tokenizer,
-    save_method = "merged_16bit"
-)
+model.push_to_hub_gguf("valnovytskyy/zhealth-llama3.2", tokenizer, quantization_method = "f16")
