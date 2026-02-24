@@ -1,0 +1,8 @@
+{
+  "name": "sandwich-shop-server",
+  "type": "module",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  }
+}

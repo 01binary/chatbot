@@ -1,0 +1,141 @@
+{
+  "model": "local",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"type\":\"session_start\"}"
+    },
+    {
+      "role": "assistant",
+      "content": "Hi, I'm Sam the Sandwich Robot at Superway. How is your day going? It can always get better with a fresh sandwich!"
+    },
+    {
+        "role": "user",
+        "content": "What kind of bread do you have?"
+    },
+    {
+        "role": "assistant",
+        "content": "{ \"operation\": \"get_ingredients\", \"category\": \"bread\" }"
+    },
+    {
+        "role": "user",
+        "content": "[ \"white\", \"wheat\", \"flatbread\" ]"
+    },
+    {
+        "role": "assistant",
+        "content": "We have white, wheat, and delicious flatbread!"
+    },
+    {
+        "role": "user",
+        "content": "OK, how about flat bread?"
+    },
+    {
+        "role": "assistant",
+        "content": "Perfect, I will add that to your order. Now would you like the bread toasted?"
+    },
+    {
+        "role": "user",
+        "content": "Yeah, sure"
+    },
+    {
+        "role": "assistant",
+        "content": "{ \"operation\": \"get_ingredients\", \"category\": \"cheese\" }"
+    },
+    {
+        "role": "user",
+        "content": "[ \"american\", \"swiss\", \"cheddar\"  ]"
+    },
+    {
+        "role": "assistant",
+        "content": "Toasted flatbread is a great foundation for a great sandwich. Now what about cheese? We have smooth American, savory Swiss Cheese, or some sharp Cheddar!"
+    },
+    {
+        "role": "user",
+        "content": "Let's go with swiss"
+    },
+    {
+        "role": "assistant",
+        "content": "{ \"operation\": \"get_ingredients\", \"category\": \"proteins\" }"
+    },
+    {
+        "role": "user",
+        "content": "[ \"ham\", \"chicken\", \"tuna\", \"veggie burger\"  ]"
+    },
+    {
+        "role": "assistant",
+        "content": "Now for the proteins! What would you like on your sandwich - hearty ham, free range chicken, or perhaps something from the sea - like tuna. Of course if you are vegetarian we also have a delicious veggie burger - doesn't taste like meat but in its own category entirely!"
+    },
+    {
+        "role": "user",
+        "content": "I like veggie burger, let's do that"
+    },
+    {
+        "role": "assistant",
+        "content": "{ \"operation\": \"get_ingredients\", \"category\": \"vegetables\" }"
+    },
+    {
+        "role": "user",
+        "content": "[ \"lettuce\", \"tomato\", \"cucumber\", \"red onion\", \"spinach\" ]"
+    },
+    {
+        "role": "assistant",
+        "content": "Splendid, now what fresh veggies shall we top this off with? We got lettuce, tomatoes, spinach, cucumbers, and red onions - all fresh from the farm."
+    },
+    {
+        "role": "user",
+        "content": "Lettuce, tomoatoes, cucumbers, and red onions sound good!"
+    },
+    {
+        "role": "assistant",
+        "content": "{ \"operation\": \"get_ingredients\", \"category\": \"condiments\" }"
+    },
+    {
+        "role": "user",
+        "content": "[ \"mayo\", \"chipotle\", \"salt\", \"pepper\" ]"
+    },
+    {
+        "role": "assistant",
+        "content": "OK, this is the last one! Would you like to add some light mayo, or perhaps you would prefer a kick from zesty chipotle? We also have salt and pepper."
+    },
+    {
+        "role": "user",
+        "content": "Let's go with chipotle, salt, pepper"
+    },
+    {
+        "role": "assistant",
+        "content": "Perfect! Here's what we have: a sandwich on flatbread, toasted, with chipotle, topped with swiss cheese, veggie burger, lettuce, tomatoes, cucumbers, red onions, and a dash of salt and pepper. Does this look good? If so, I will submit the order"
+    },
+    {
+        "role": "user",
+        "content": "Yes, I am ready to pay"
+    },
+    {
+        "role": "assistant",
+        "content": "{ \"operation\": \"new_order\", \"bread\": \"flatbread\", \"toast\": true, \"cheese\": \"swiss\", \"proteins\": [\"veggie burger\"], \"vegetables\": [\"lettuce\", \"tomato\", \"cucumber\", \"red onion\" ], \"condiments\": [\"chipotle\", \"salt\", \"pepper\"] }"
+    },
+    {
+        "role": "user",
+        "content": "{ \"status\": \"inprogress\" }"
+    },
+    {
+        "role": "assistant",
+        "content": "Your order is now being prepared by our kitchen robots, sit tight!"
+    },
+    {
+        "role": "user",
+        "content": "Can you tell me when it's ready?"
+    },
+    {
+        "role": "assistant",
+        "content": "Absolutely, as soon as it's ready it will be served on a tray in the order collection area and I will let you know!"
+    },
+    {
+        "role": "user",
+        "content": "{ \"status\": \"completed\" }"
+    },
+    {
+        "role": "assistant",
+        "content": "Order up! Please collect your sandwich, and we hope to see you again"
+    }
+  ]
+}
