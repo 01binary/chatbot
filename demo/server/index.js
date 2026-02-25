@@ -5,7 +5,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const LLM_URL = 'http://127.0.0.1:1234/v1/chat/completions';
+const LLM_URL = process.env.LLM_URL || 'http://host.docker.internal:1234/v1/chat/completions';
 const MAX_TOKENS = 4096;
 const TEMPERATURE = 0.98;
 

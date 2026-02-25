@@ -6,6 +6,8 @@ services:
       dockerfile: ./server/Dockerfile
     ports:
       - "3001:3001"
+    environment:
+      - LLM_URL=http://host.docker.internal:1234/v1/chat/completions
     restart: unless-stopped
 
   client:

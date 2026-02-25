@@ -12,15 +12,17 @@ Minimal demo: React frontend + Express backend. The chatbot proxies chat to a lo
 
 Prerequisites: Docker Desktop installed.
 
-1. From the project root run:
+1. Start your LLM server on the host machine at **http://127.0.0.1:1234** (e.g. `ollama serve`).
+
+2. From the project root run:
 
 ```bash
 docker compose up --build
 ```
 
-2. Open the app at http://localhost:3000. The frontend will proxy API requests to the server at `http://server:3001` via nginx.
+3. Open the app at http://localhost:3000. The frontend will proxy API requests to the server at `http://server:3001` via nginx.
 
-3. To stop the app:
+4. To stop the app:
 
 ```bash
 docker compose down
@@ -28,7 +30,9 @@ docker compose down
 
 Notes:
 - The server listens on port `3001` inside the compose network and is exposed to the host at `3001` as well.
-- The client is served by nginx on `3000` and proxies `/api` to the server container. The app still expects an LLM at `http://127.0.0.1:1234` on the host (see above); run your local LLM before starting the stack.
+- The client is served by nginx on `3000` and proxies `/api` to the server container. 
+- The server talks to the LLM at `http://host.docker.internal:1234` (resolves to your host machine on macOS/Windows Docker Desktop).
+- To use a different LLM URL, override the `LLM_URL` environment variable in `docker-compose.yml` or set it when running: `docker compose run --env LLM_URL=http://your-server:port/... server`
 
 
 ## API (Express, port 3001)
