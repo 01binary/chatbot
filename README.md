@@ -2,11 +2,15 @@
 
 > A practical, end-to-end workflow for tool-calling chat bots
 
+Here’s a smoother, more natural version that keeps your tone but improves flow and clarity:
+
+---
+
 ## Overview
 
-Building a chat bot requires using *large language models* (LLMs). These models can understand and generate human language, making them ideal for conversational tasks.
+Modern chat bots are powered by *large language models* (LLMs) - AI systems trained to understand and generate human language. Because of this, they can carry on conversations, answer questions, and follow complex instructions.
 
-Instead of building an LLM from scratch, we start with an existing *pre-trained* model and adapt it to our needs - a process called *fine-tuning*.
+Rather than building an LLM from scratch (a costly and time-intensive process), we start with an existing *pre-trained* model and adapt it to our specific use case. This process is known as *fine-tuning*.
 
 ### Pre-training
 
