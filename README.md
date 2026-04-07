@@ -2,10 +2,6 @@
 
 > A practical, end-to-end workflow for tool-calling chat bots
 
-Here’s a smoother, more natural version that keeps your tone but improves flow and clarity:
-
----
-
 ## Overview
 
 Modern chat bots are powered by *large language models* (LLMs) - AI systems trained to understand and generate human language. Because of this, they can carry on conversations, answer questions, and follow complex instructions.
