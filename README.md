@@ -43,15 +43,13 @@ Before we jump into integration and training, we’ll use prompts to evaluate mo
 
 ## Evaluating Models
 
-[Few-shot prompting](https://www.ibm.com/think/topics/few-shot-prompting) refers to the process of providing an AI model with a few examples of a task to guide its performance.
-
-This lets you quickly evaluate an LLM's behavior and capabilities before investing time in integration and training.
+[Few-shot prompting](https://www.ibm.com/think/topics/few-shot-prompting) refers to the process of providing an AI model with a few examples of a task to guide its performance. This lets you quickly evaluate an LLM's behavior and capabilities before investing time in integration and training.
 
 The examples you use in few-shot prompts can later be reused as the foundation for a training dataset.
 
 ### Exploring Models
 
-[LM Studio](https://lmstudio.ai/) provides a simple way to experiment with multiple large language models on your computer. It uses the [Llama.cpp](https://github.com/ggml-org/llama.cpp) hardware-accelerated engine under the hood to run LLMs locally.
+[LM Studio](https://lmstudio.ai/) provides a simple and visual way to experiment with multiple large language models on your computer. It uses the [Llama.cpp](https://github.com/ggml-org/llama.cpp) hardware-accelerated engine under the hood to run LLMs locally.
 
 Llama.cpp includes a command line utility called [Llama.cpp Server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server), which starts a web server with a given IP address and port number, and loads the specified large language model. This makes talking to an LLM as simple as sending REST API requests to a local server.
 
