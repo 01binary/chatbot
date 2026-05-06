@@ -4,9 +4,9 @@
 
 ## Overview
 
-Modern chat bots are powered by *large language models* (LLMs) - AI systems trained to understand and generate human language. Because of this, they can carry on conversations, answer questions, and follow complex instructions.
+Modern chat bots are powered by *large language models* (LLMs). These models can understand and generate human language, making them ideal for conversational tasks.
 
-Rather than building an LLM from scratch (a costly and time-intensive process), we start with an existing *pre-trained* model and adapt it to our specific use case. This process is known as *fine-tuning*.
+Instead of training an LLM from scratch (a costly and time-intensive process), we start with an existing *pre-trained* model and adapt it to our needs. This process is known as *fine-tuning*.
 
 ### Pre-training
 
@@ -14,9 +14,13 @@ Pre-trained models have already learned general language patterns by analyzing v
 
 The [Build a Large Language Model (From Scratch)](https://www.amazon.com/Build-Large-Language-Model-Scratch/dp/1633437167) book by Sebastian Raschka is a great resource for understanding how pre-training works in detail.
 
+![Build a Large Language Model From Scratch Book](./images/book.png)
+
+This tutorial is designed to help you integrate an LLM into your application as quickly as possible, which doesn't require in-depth knowledge.
+
 ### Fine-tuning
 
-Fine-tuning is the process of teaching the pre-trained model to perform specialized tasks, such as automating data entry in applications in response to user prompts.
+Fine-tuning is the process of teaching a pre-trained model to perform specialized tasks, which could be anything from updating database records to executing commands and accessing APIs.
 
 Some examples of fine-tuned models in the medical field:
 
@@ -24,33 +28,34 @@ Some examples of fine-tuned models in the medical field:
 + [Clinical Bert](https://huggingface.co/medicalai/ClinicalBERT)
 + [Medical GPT](https://huggingface.co/dousery/medical-reasoning-gpt-oss-20b)
 
-This fine-tuning tutorial is partially based on [Fine-Tuning LLMs Guide](https://unsloth.ai/docs/get-started/fine-tuning-llms-guide) published by Unsloth team.
-
 ### Step-by-Step Process
 
-In this tutorial, we'll walk through the complete workflow for fine-tuning a pre-trained language model into a usable chat bot:
+In this tutorial, we'll walk through the complete steps for selecting an LLM, integrating it with your application, locking in the desired behavior by fine-tuning, and deploying it to production.
 
 ![timeline](./images/timeline.png)
 
-1. Experiment with LLMs using *few-shot prompts*
-2. Set up a cloud-based *scientific computing environment* and load a *pre-trained* LLM
-1. Prepare and load a fine-tuning *dataset*
-2. *Fine-tune* the model on your data
-3. Run *inference* in development, test, and production
+1. **Evaluate** LLMs with *system prompts* and *few-shot prompts*
+2. **Integrate** an LLM with your application by using *Tool Calling*, *Structured Output*, or *Model Context Protocol*
+3. **Fine-tune** the selected model on your use case
+3. **Deploy** the model to inference endpoints
 
-## Few-Shot Prompting
+Before we jump into integration and training, we’ll use prompts to evaluate models, learn how they are packaged on the Hugging Face Hub, and preview the Chat API we’ll use later for integration.
 
-Before we jump into training, we’ll use [few-shot prompting](https://www.ibm.com/think/topics/few-shot-prompting) to quickly test different models, learn how models are packaged on the Hugging Face Hub, and preview the Chat API we’ll use later for integration.
+## Evaluating Models
 
-Instructing an LLM to perform a task by describing the task and providing a small number of examples is known as *few-shot prompting*.
+[Few-shot prompting](https://www.ibm.com/think/topics/few-shot-prompting) refers to the process of providing an AI model with a few examples of a task to guide its performance.
 
-> Imagine you are instructing an intern to perform a data-entry task. You first explain what needs to be done, then walk through a few examples, and finally ask them to try it on their own.
+This lets you quickly evaluate an LLM's behavior and capabilities before investing time in integration and training.
 
-Few-shot prompting lets you quickly evaluate an LLM's behavior and capabilities before investing time in training. The examples you use in few-shot prompts can later be reused as the foundation for a training dataset.
+The examples you use in few-shot prompts can later be reused as the foundation for a training dataset.
 
-### Experimenting with Models
+### Exploring Models
 
-The easiest way to experiment with multiple models is using [LM Studio](https://lmstudio.ai/) locally, where you can evaluate different models without worrying about usage limits or cloud billing.
+[LM Studio](https://lmstudio.ai/) provides a simple way to experiment with multiple large language models on your computer. It uses the [Llama.cpp](https://github.com/ggml-org/llama.cpp) hardware-accelerated engine under the hood to run LLMs locally.
+
+Llama.cpp includes a command line utility called [Llama.cpp Server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server), which starts a web server with a given IP address and port number, and loads the specified large language model. This makes talking to an LLM as simple as sending REST API requests to a local server.
+
+For developers that prefer using command-line tools, [Ollama](https://ollama.com/) CLI provides the same functionality as LM Studio. However, LM Studio is more beginner-friendly and has a rich graphical interface, so it's used in this tutorial.
 
 The following table provides a rough starting point for choosing model sizes to experiment with, depending on the amount of system memory available:
 
@@ -62,16 +67,18 @@ The following table provides a rough starting point for choosing model sizes to 
 
 When first launching LM Studio, you'll be asked to choose a UI complexity level and download the first model. Select *Power User* and skip downloading a model for now - we'll look at model selection next.
 
-The **Discover** tab in LM Studio is a simple browsing interface for exploring models hosted on the [Hugging Face Hub](https://huggingface.co/models), which you can think of as GitHub for machine learning models.
+The **Discover** tab in LM Studio is a simple browsing interface for exploring models hosted on the [Hugging Face Hub](https://huggingface.co/models), which is like GitHub for machine learning models.
 
 Each model is stored as a Git repository, typically containing a *README* and a set of model files. Hugging Face uses Git Large File Storage (LFS) under the hood to manage large assets such as model weights.
 
-The two most common formats you’ll encounter for model weights are [Safetensors](https://huggingface.co/docs/text-generation-inference/en/conceptual/safetensors) and [GGUF](https://huggingface.co/docs/hub/en/gguf):
+The most common formats you’ll encounter for model weights are [Safetensors](https://huggingface.co/docs/text-generation-inference/en/conceptual/safetensors), [GGUF](https://huggingface.co/docs/hub/en/gguf), and [MLX](https://huggingface.co/docs/hub/en/mlx):
 
 + Safetensors (`.safetensors`)  
 This format is commonly used for training and fine-tuning. Models available in this format can typically be adapted for specific tasks.
 + GGUF (`.gguf`)  
 This format is optimized for inference. GGUF models are designed to run efficiently in tools like LM Studio and llama.cpp, but cannot be further trained.
++ MLX (`.mlx`)  
+This format is optimized for inference like GGUF, but [designed specifically for Apple GPUs](https://contracollective.com/blog/mlx-vs-llama-cpp-apple-silicon-local-ai), running efficiently in tools like LM Studio and Ollama.
 
 ### Model Capabilities
 
@@ -85,54 +92,40 @@ The LM Studio model browser uses badges to highlight common model capabilities:
 
 ### Downloading a Model
 
-Select a model for experimentation and click **Download** at the bottom of the LM Studio browser. The download progress will be displayed at the bottom of the vertical tab bar running along the left side of LM Studio.
+Select a model for experimentation and click **Download** at the bottom of the LM Studio browser. Once a model is downloaded, it can be selected at the top of the LM Studio window. The **Chat** tab can then be used to talk to the model.
 
-Once a model is downloaded, it can be selected at the top of the LM Studio window. The **Chat** tab can then be used to talk to the model.
+### Prompts
 
-### Instruction and System Prompts
-
-Instructing an LLM is fundamentally the process of communicating requirements.
-
-It is not accidental that few-shot prompts and fine-tuning datasets resemble structures used to define software requirements and expected behavior - such as [Gherkin](https://www.businessanalysisexperts.com/gherkin-user-stories-given-when-then-examples/) scenarios used by business analysts, or the [Arrange / Act / Assert](https://automationpanda.com/2020/07/07/arrange-act-assert-a-pattern-for-writing-good-tests/) pattern used in automated testing.
+Instructing an LLM is fundamentally the process of communicating requirements:
 
 - **System Prompt** defines the model's role, behavior, and constraints (see [examples of system prompts](https://huggingface.co/datasets/danielrosehill/System-Prompt-Library))
-- **User Prompt** represents a question or request from a user
+- **User Prompt** represents a user question
 - **Assistant Response** demonstrates the ideal reply the model should produce
 
 Taken together, these three messages describe a "teachable moment": a single row of a training dataset, or a single conversation in a few-shot chat.
 
-This structure closely resembles Gherkin requirements:
+In LM Studio, a System Prompt can be entered by clicking **Configuration** in the sidebar of the **Chat** tab, which could be opened by clicking on *Show Sidebar* button at the top right corner of the screen.
 
-+ *Given*: sets up the stage (**System Prompt**)
-+ *When*: a user-triggered event happens (**User Prompt**)
-+ *Then*: the expected outcome is demonstrated (**Assistant Response**)
-
-The same pattern appears in automated tests:
-
-- *Arrange*: sets up the stage (**System Prompt**)
-- *Act*: perform an action (**User Prompt**)
-- *Assert*: define the expected result (**Assistant Response**)
-
-In LM Studio, a System Prompt can be entered by clicking **Context** in the right pane of the **Chat** tab:
-
-![system prompt](./images//system-prompt.png)
+![system prompt](./images/system-prompt.png)
 
 ### Tool Calling
 
-A pre-trained LLM can be fine-tuned to **use external tools** by describing those tools in the system prompt and instructing the model to respond using a specific, machine-readable format.
+Large Language Models (especially the ones meant for following instructions, with *Instruct* in their name) know how emit Python or JSON in response to natural language prompts.
 
-In practice, this works by having the model return a structured response (typically JSON). The application hosting the model detects this response, calls the appropriate external tool or web service, and then passes the result back to the model as input. The model can then incorporate the tool’s output into a natural-language reply to the user.
+This is known as *tool calling* or *function calling*, and it's documented in guides for all major models:
 
-> The Llama documentation includes [Introduction to Tool Calling](https://github.com/meta-llama/llama-cookbook/blob/main/end-to-end-use-cases/agents/Agents_Tutorial/Tool_Calling_101.ipynb) notebook that demonstrates this pattern.
++ [LLama Tool Calling](https://llama.developer.meta.com/docs/features/tool-calling/)
++ [Gemma Function Calling](https://ai.google.dev/gemma/docs/capabilities/function-calling)
++ [Qwen Function Calling](https://qwen.readthedocs.io/en/latest/framework/function_call.html)
 
-Below is an example *system prompt* that teaches the model how to use a custom tool called `trending_songs` during training:
+Tool Calling is a key capability that allows LLMs to be integrated with web applications, cloud services, command line utilities, smart home and industrial automation systems, and robots.
+
+You can quickly evaluate a model's performance with tool calling by including the instructions in its system prompt, for example:
 
 ```
 You are a helpful assistant.
 
-Answer the user's question by making use of the following functions if needed.
-
-If none of the functions can be used, please say so.
+Answer the user's question by making use of the following functions if needed. If none of the function can be used, please say so.
 
 Here is a list of functions in JSON format:
 
@@ -141,73 +134,61 @@ Here is a list of functions in JSON format:
   "function": {
     "name": "trending_songs",
     "description": "Returns the trending songs on a Music site",
-    "parameters": {
-      "type": "object",
-      "properties": [
-        {
-          "n": {
-            "type": "object",
-            "description": "The number of songs to return"
+    "parameters": [
+      {
+        "type": "object",
+        "properties": [
+          {
+            "n": {
+              "type": "object",
+              "description": "The number of songs to return"
+            }
+          },
+          {
+            "genre": {
+              "type": "object",
+              "description": "The genre of the songs to return"
+            }
           }
-        },
-        {
-          "genre": {
-            "type": "object",
-            "description": "The genre of the songs to return"
-          }
-        }
-      ],
-      "required": ["n"]
-    }
+        ],
+        "required": ["n"]
+      }
+    ]
   }
 }
 
 Return function calls in JSON format.
 ```
 
-With this system prompt, a request such as *"What are the top trending songs right now?"* would cause the model to respond with a structured tool invocation:
+When a relevant question is asked, the model will respond with a data structure:
 
-```
-{
-  "type": "function",
-  "name": "trending_songs",
-  "parameters": {
-    "n": "10",
-    "genre": "all"
-  }
- }
-```
+![Basic Tool Call Example](./images/tool-call.png)
 
-The application communicating with the model (for example, via a [Chat API](https://huggingface.co/docs/text-generation-inference/en/messages_api)) detects this response, calls the corresponding external tool, and sends the tool’s output back to the model as the next message.
+This data structure matches the [JSON Schema](https://json-schema.org/) specified for each parameter in the function call definition.
 
-The LLM then converts that tool output into a human-readable response for the user.
+## Integration
 
-Models that have already been trained to follow instructions and emit tool calls can be **fine-tuned further** to use domain-specific or proprietary tools. These models typically include `Instruct` in their name, such as [Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct), which is the variant used in this tutorial.
-
-### Retrieval Augmented Generation
-
-Some applications extend LLMs with external documents or databases using a technique called *retrieval-augmented generation*, or **RAG**.
-
-RAG is not a model capability - it's an application pattern that retrieves relevant information and injects it into the prompt at runtime. This differs from tool calling, where the model itself decides when to request external information during a conversation.
-
-We won't use RAG in this tutorial, but you’ll encounter the term frequently when building real-world applications.
+Next we'll look at how to interact with LLMs by sending REST API requests to a locally running LLM server by using the *Chat API*.
 
 ### Chat API
 
-When models are deployed for production use, they are typically accessed through a *chat-style API*. These APIs accept a structured conversation - usually a list of messages with roles such as `system`, `user`, and `assistant` - and return the model’s next response.
+When models are deployed in production, they are typically accessed through a *chat-style API*.
 
-Two closely related chat APIs are commonly encountered:
+You send a list of messages with roles such as `system` (system prompt), `user` (user question), and `assistant` (agent response) and the LLM server runs [inference](https://research.ibm.com/blog/AI-inference-explained) on the model to predict the next agent response.
 
-- **Hugging Face Chat API**  
-  Hugging Face provides a chat-oriented API as part of its [Text Generation Inference (TGI)](https://huggingface.co/docs/text-generation-inference/en/index) stack. This API is used by Hugging Face Inference Endpoints (see next section) and by services that deploy models directly using TGI.
+The most common chat APIs are:
 
-- **OpenAI-compatible Chat APIs**  
+- [Hugging Face Chat API](https://huggingface.co/docs/text-generation-inference/en/index)  
+  Hugging Face provides a chat-oriented API used by *Hugging Face Inference Endpoints* and other services that deploy models directly using Hugging Face Text Generation Interface.
+
+- [OpenAI-compatible Chat API](https://developers.openai.com/api/reference/overview)  
   Many cloud providers expose deployed models through APIs that follow the same request and response structure as OpenAI’s Chat Completions API. Even when the underlying model is hosted on Hugging Face or uses a different inference engine, the API surface is often kept OpenAI-compatible for portability.
 
-In practice, these two APIs are very similar. Both use a `messages` structure, support system prompts, and can return structured outputs such as tool calls.
+Both of these APIs describe a list of `messages` between the user and the agent and support system prompts, tool calls, and structured output.
 
 Here's an example of an OpenAI-compatible Chat API request:
-```
+
+```json
 {
   "model": "llama-3.2-3b-instruct",
   "messages": [
@@ -223,9 +204,9 @@ Here's an example of an OpenAI-compatible Chat API request:
 }
 ```
 
-This payload is typically sent to an endpoint such as:
+This payload is typically sent to a *chat completion* endpoint of the running LLM server:
 
-```
+```bash
 POST /v1/chat/completions
 ```
 
@@ -234,13 +215,171 @@ The easiest way to experiment with Chat API is by using the **Server** functiona
 + Click **Status** switch to run the server.
 + Server **address** and **port** will be displayed in the same box, `http://127.0.0.1:1234` by default.
 
-Try using [Postman](https://www.postman.com/) to send an `application/json` payload to http://127.0.0.1:1234/v1/chat/completions (LM Studio’s OpenAI-compatible endpoint):
+Try using [Postman](https://www.postman.com/) or [Bruno](https://www.usebruno.com/) to send an `application/json` payload to http://127.0.0.1:1234/v1/chat/completions (LM Studio’s OpenAI-compatible endpoint):
 
 ![postman](./images/postman.png)
 
-## Environment Setup
+### Tool Calls
 
-Now that we're familiar with LLM capabilities, selected a model, and recorded few-shot prompts that produce a desired behavior, we're ready to "burn-in" the model's customized personality by *fine-tuning* its weights.
+The Chat API supports a strongly-typed schema for advertising and making tool calls, as well as returning tool call results.
+
+In the following request, tool calls are advertised to the agent by including them in the `tools` array, using exactly the same format we've used earlier to describe them in the system prompt:
+
+```json
+{
+  "model": "Llama-3.2-3B-Instruct",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is the weather in Menlo Park?"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "description": "Retrieve the current temperature for a specified location",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string",
+              "description": "The city, state, or country for which to fetch the temperature"
+            }
+          },
+          "required": ["location"],
+          "additionalProperties": false
+        },
+        "strict": true
+      }
+    }
+  ]
+}
+```
+
+The agent responds with empty message `content` and tool calls listed in `tool_calls` array:
+
+```json
+{
+  "model": "llama-3.2-3b-instruct",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "",
+        "reasoning_content": "",
+        "tool_calls": [
+          {
+            "type": "function",
+            "id": "311592109",
+            "function": {
+              "name": "get_weather",
+              "arguments": "{\"location\":\"Menlo Park\"}"
+            }
+          }
+        ]
+      },
+      "finish_reason": "tool_calls"
+    }
+  ]
+}
+```
+
+This makes tool calls simple to extract from the JSON structure and execute for the program controlling the LLM.
+
+### Structured Output
+
+*Structured Output* is a way to reliably constrain the output of an LLM to a data structure.
+
+This feature is similar to tool calls in that it allows LLMs to return JSON or Python data structures in response to natural language prompts, and it's suppored by all major models:
+
+* [Llama Structured Output](https://llama.developer.meta.com/docs/features/structured-output/)
+* [Gemma Structured Output](https://ai.google.dev/gemini-api/docs/structured-output?example=recipe)
+* [Qwen Structured Output](https://www.alibabacloud.com/help/en/model-studio/qwen-structured-output)
+
+To enable Structured Output, include the [JSON Schema](https://json-schema.org/) for validating the response in `json_schema` under `response_format`:
+
+```json
+{
+  "model": "local",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful jokester."
+    },
+    {
+      "role": "user",
+      "content": "Tell me a joke."
+    }
+  ],
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "joke_response",
+      "strict": "true",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "joke": {
+            "type": "string"
+          }
+        },
+        "required": ["joke"]
+      }
+    }
+  }
+}
+```
+
+The model response will include the data structure inside the message `content` rather than in the `tool_calls` array:
+
+```json
+{
+  "model": "llama-3.2-3b-instruct",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"joke\": \"A man walked into a library and asked the librarian, 'Do you have any books on Pavlov's dogs and Schrödinger's cat?' The librarian replied, 'It rings a bell, but I'm not sure if it's here or not.'\"\n}",
+        "reasoning_content": "",
+        "tool_calls": []
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+```
+
+### Model Context Protocol
+
+Model Context Protocol (MCP) is a [standard developed by Anthropic](https://www.anthropic.com/news/model-context-protocol) to simplify integrating AI into applications.
+
+The [MCP specification](https://modelcontextprotocol.io/docs/getting-started/intro) reduces the integration surface between AI agents and other layers of the software stack down to a simple class with methods which the agents can call to perform actions and retrieve information.
+
+MCP addresses the shortcomings of *Tool Calling* and *Structured Output*:
+
+* **Structured Output** can only describe a single data structure with JSON Schema. The instructions for filling out this data structure must be included in the system prompt.
+* **Tool Calling** expands on this by providing AI agents with multiple data structures they can output. The system prompt explains how to work with these tools.
+
+The system prompt is a part of the agent's *context*. Model Context Protocol lets you switch an AI agent's context *on the fly*, giving it a system prompt and tool calls for working on a specific task only when needed:
+
+* Without MCP, we would have to create our own system that can detect the task the user is working on and load the appropriate *system prompt* and *tools* to enable the AI agent to help with that task.
+* With MCP, AI agents can query a server to determine which tools are available to use, and how to use them. This lets you build a large *directory* of tools the agent can use, and even include prompts - all without any custom coding on your part.
+
+MCP servers are simple to setup for [many languages and frameworks](https://modelcontextprotocol.io/docs/sdk):
+
+* A good starting point is using the [C# SDK](https://github.com/modelcontextprotocol/csharp-sdk) to standup a [server that lets AI agents query the National Weather Service](https://modelcontextprotocol.io/docs/develop/build-server#c%23).
+* Microsoft also published tutorials on [integrating an AI agent with a TODO list app](https://learn.microsoft.com/en-us/azure/app-service/tutorial-ai-model-context-protocol-server-dotnet) connected to a database, and an [echo server](https://devblogs.microsoft.com/dotnet/build-a-model-context-protocol-mcp-server-in-csharp/).
+* The companion example created as part of this article [integrates an AI agent with an inventory tracking web application](https://github.com/01binary/inventory-llm) which includes a React frontend, a .NET backend, and a SQLite database.
+
+Now that we've explored all the major methods for integrating AI into applications and understand how to use the Chat API, it's time to explore *fine-tuning*: a way to lock-in the behavior defined by a general system prompt and few-shot example conversations that steer the AI agent toward desired outcomes for reliable production performance.
+
+## Fine-Tuning
+
+### Environment Setup
 
 Data scientists use *Scientific computing notebooks* to fine-tune Large Language Models. These notebooks are divided into cells, with some cells containing text and graphics formatted with Markdown, and others containing Python code.
 
@@ -290,7 +429,7 @@ Other available Llama 3.2 variants include:
 |`unsloth/Llama-3.2-3B-bnb-4bit`|3B-parameter pre-trained model, quantized to 4-bit
 |`unsloth/Llama-3.2-1B-Instruct-bnb-4bit`|1B-parameter instruction-tuned model, quantized to 4-bit
 
-## Preparing a Dataset
+### Preparing a Dataset
 
 In this section we look inside a typical dataset used to train AI models and discuss strategies for generating one. After generating the dataset we upload it to Kaggle registry so that we can use it for training in the next step.
 
@@ -506,7 +645,7 @@ hf download <repo_id> <file_name> \
 
 ### Production Inference
 
-Once your trained model is available on the registry, many cloud providers can use the published files to pull your model and start a virtual machine that exposes an API for talking to it.
+Once your trained model is available on the Hugging Face registry, many cloud providers can use the published files to pull your model and start a virtual machine that exposes a Chat API.
 
 After being uploaded, the model can be deployed for production inference using a variety of managed services:
 
