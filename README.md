@@ -12,11 +12,11 @@ Instead of training an LLM from scratch (a costly and time-intensive process), w
 
 Pre-trained models have already learned general language patterns by analyzing vast amounts of text. This is done with *unsupervised training*, where a model iteratively learns to generate the next word in a sequence.
 
-The [Build a Large Language Model (From Scratch)](https://www.amazon.com/Build-Large-Language-Model-Scratch/dp/1633437167) book by Sebastian Raschka is a great resource for understanding how pre-training works in detail.
+The [Build a Large Language Model (From Scratch)](https://www.amazon.com/Build-Large-Language-Model-Scratch/dp/1633437167) book by Sebastian Raschka is a great resource for understanding how pre-training works in detail:
 
 ![Build a Large Language Model From Scratch Book](./images/book.png)
 
-This tutorial is designed to help you integrate an LLM into your application as quickly as possible, which doesn't require in-depth knowledge.
+This tutorial is designed to help you integrate an LLM chat bot into your application as quickly as possible, which doesn't require such in-depth knowledge.
 
 ### Fine-tuning
 
@@ -47,7 +47,7 @@ Before we jump into integration and training, we’ll use prompts to evaluate mo
 
 ### Exploring Models
 
-[LM Studio](https://lmstudio.ai/) provides a simple and visual way to experiment with multiple large language models on your computer. It uses the [Llama.cpp](https://github.com/ggml-org/llama.cpp) hardware-accelerated engine under the hood to run LLMs locally.
+[LM Studio](https://lmstudio.ai/) provides a simple and visual way to experiment with multiple large language models on your computer. It uses [Llama.cpp](https://github.com/ggml-org/llama.cpp) and [MLX](https://github.com/ml-explore/mlx) hardware-accelerated engines under the hood to run LLMs locally.
 
 Llama.cpp includes a command line utility called [Llama.cpp Server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server), which starts a web server with a given IP address and port number, and loads the specified large language model. This makes talking to an LLM as simple as sending REST API requests to a local server.
 
@@ -60,6 +60,8 @@ The following table provides a rough starting point for choosing model sizes to 
 |3 - 8 billion parameters|`16 GB` RAM|
 |13 billion parameters|`32 GB` RAM|
 |30 - 34 billion parameters|`64 GB` RAM|
+
+> The exact meaning of *system memory* depends on your system. MacOS ARM computers use a unified memory architecture while Windows and Linux have separate system and video card memory.
 
 When first launching LM Studio, you'll be asked to choose a UI complexity level and download the first model. Select *Power User* and skip downloading a model for now - we'll look at model selection next.
 
@@ -371,9 +373,9 @@ MCP servers are simple to setup for [many languages and frameworks](https://mode
 * Microsoft also published tutorials on [integrating an AI agent with a TODO list app](https://learn.microsoft.com/en-us/azure/app-service/tutorial-ai-model-context-protocol-server-dotnet) connected to a database, and an [echo server](https://devblogs.microsoft.com/dotnet/build-a-model-context-protocol-mcp-server-in-csharp/).
 * The companion example created as part of this article [integrates an AI agent with an inventory tracking web application](https://github.com/01binary/inventory-llm) which includes a React frontend, a .NET backend, and a SQLite database.
 
-Now that we've explored all the major methods for integrating AI into applications and understand how to use the Chat API, it's time to explore *fine-tuning*: a way to lock-in the behavior defined by a general system prompt and few-shot example conversations that steer the AI agent toward desired outcomes for reliable production performance.
-
 ## Fine-Tuning
+
+Now that we've explored all the major methods for integrating AI into applications and understand how to use the Chat API, it's time to explore *fine-tuning*: a way to lock-in the behavior defined by a general system prompt and few-shot example conversations that steer the AI agent toward desired outcomes for reliable production performance.
 
 ### Environment Setup
 
@@ -385,8 +387,6 @@ Rather than configuring a scientific computing environment on your own machine, 
 - **Software**: Local Python and ML setups often run into dependency and version conflicts. Using a cloud Python notebook is essentially like spinning up a VM: everything is setup from scratch every time, exactly the right way.
 
 Create a Kaggle account to get started. Kaggle provides free compute credits each month, with the option to add a credit card for additional usage.
-
-When you’re finished, **stop your notebook**. Kaggle runs each notebook on a virtual machine, and leaving it running will continue to use your available credits.
 
 ### Loading a Pre-Trained Model
 
@@ -413,17 +413,10 @@ The fine-tuning script in this repository uses:
 **`unsloth/Llama-3.2-3B-Instruct-bnb-4bit`**
 
 This model is:
+- 3 billion parameters
 - Pre-trained on large-scale text data
 - Instruction-tuned for conversational behavior and tool calling
-- Quantized to 4-bit using [Bits and Bytes format](https://huggingface.co/docs/transformers/en/quantization/bitsandbytes) to reduce GPU memory usage
-
-Other available Llama 3.2 variants include:
-
-|Model|Description
-|-|-|
-|`unsloth/Llama-3.2-1B-bnb-4bit`|1B-parameter pre-trained model, quantized to 4-bit
-|`unsloth/Llama-3.2-3B-bnb-4bit`|3B-parameter pre-trained model, quantized to 4-bit
-|`unsloth/Llama-3.2-1B-Instruct-bnb-4bit`|1B-parameter instruction-tuned model, quantized to 4-bit
+- Quantized to 4-bit using [BnB (Bits and Bytes) format](https://huggingface.co/docs/transformers/en/quantization/bitsandbytes) to reduce GPU memory usage
 
 ### Preparing a Dataset
 
@@ -433,7 +426,7 @@ In this section we look inside a typical dataset used to train AI models and dis
 
 Several compact dataset formats are commonly used for instruction fine-tuning. Fortunately, these formats closely resemble Chat API request payloads, so if you experimented with the Chat API earlier, the dataset structure will already feel familiar.
 
-In this tutorial, we focus on **ShareGPT format**, but the closely related **Hugging Face Generic format** is also shown for reference. Unsloth provides utilities to convert between these formats if needed.
+In this tutorial, we focus on **ShareGPT format**, but the closely related **Hugging Face Generic format** is also shown for reference. Many libraries can convert between these formats if needed.
 
 #### ShareGPT Format
 
@@ -478,7 +471,7 @@ An example dataset in this format is available at: [allenai/tulu-3-sft-mixture](
 
 In order to use an instruction prompt dataset during training, it has to be uploaded to a repository like [Huggingface](https://huggingface.co/datasets) or [Kaggle](https://www.kaggle.com/datasets). Both function like "GitHub for data science" and support pushing and pulling AI models and datasets.
 
-Datasets are stored either directly as `JSONL` and `CSV`, or in a sharded format called [Parquet](https://www.snowflake.com/en/fundamentals/parquet/). Using shards lets repositories split the dataset into many pieces for efficient storage.
+Datasets are stored either directly as `JSONL` and `CSV`, or in a sharded format called [Parquet](https://www.snowflake.com/en/fundamentals/parquet/). Using shards lets repositories split large datasets into many pieces for efficient storage.
 
 Install Kaggle CLI:
 
@@ -582,21 +575,17 @@ Training hyperparameters control how the model learns from the dataset and how g
 
 These settings control the *learning dynamics* - how fast the model learns, how stable training is, and how efficiently hardware is used.
 
-In practice, fine-tuning usually begins with conservative defaults and small experiments. Hyperparameters are then adjusted iteratively based on training stability, loss curves, and downstream model behavior.
+Fine-tuning usually begins with conservative defaults and small experiments. Hyperparameters are then adjusted iteratively based on training stability, loss curves, and model behavior.
 
 ## Inference
 
 In this section we evaluate the fine-tuned model across the full lifecycle: in development (directly in the notebook), in testing (by downloading from the Hub and running locally in LM Studio), and in production (by calling a deployed Chat API endpoint).
 
-Using a trained large language model to generate responses is referred to as *inference*. During inference, the model applies its learned weights to predict outputs based on supplied input, such as a user question or conversation history.
-
-In this tutorial, inference is demonstrated across the life-cycle of chat bot development: in development, in testing, and in production.
+Using a large language model to generate responses is referred to as *inference*. During inference, the model applies its learned weights to predict outputs based on supplied input, such as a user question or conversation history.
 
 ### Development Inference
 
-During development, Unsloth provides a `generate` method on `FastLanguageModel` that allows running inference directly in Python.
-
-This makes it possible to test prompts and evaluate model behavior immediately after fine-tuning, without first pushing the model to a repository or deploying it to a cloud service.
+During development, Unsloth provides a `generate` method on `FastLanguageModel` that allows running inference as soon as training completes. This makes it possible to test prompts and evaluate model behavior without first pushing the model to a repository.
 
 Development inference is useful for rapid iteration, debugging prompts, and verifying that fine-tuning produced the expected behavior - all within the confines of the Python training notebook.
 
@@ -604,7 +593,7 @@ Development inference is useful for rapid iteration, debugging prompts, and veri
 
 After training completes, the Python code in [fine-tune.py](./fine-tune.py) uses the `push_to_hub_merged` method to upload the model to a Hugging Face repository.
 
-This process merges the frozen pre-trained weights with the fine-tuned LoRA weights into a single, fully deployable model.
+This merges the frozen pre-trained weights with the fine-tuned LoRA weights into a single, fully deployable model.
 
 A typical model repository includes the following files:
 
@@ -618,9 +607,9 @@ A typical model repository includes the following files:
 
 Large models are often split into multiple files, or *shards*, which allows registries to store and distribute them more efficiently.
 
-To load your fine-tuned model in LM Studio, first it must be pushed to Hugging Face model registry.
+To load your fine-tuned model in LM Studio or try the [inference.py](./inference.py) notebook, first it must be pushed to Hugging Face model registry.
 
-This will let you use the [Hugging Face CLI](https://huggingface.co/docs/huggingface_hub/en/guides/cli), configured with a Hugging Face API Token, to download the model into LM Studio's model folder:
+This will let you use the [Hugging Face CLI](https://huggingface.co/docs/huggingface_hub/en/guides/cli), configured with a Hugging Face API Token, to download the model into LM Studio's model folder for local testing:
 
 |OS|Location|
 |-|-|
@@ -628,7 +617,7 @@ This will let you use the [Hugging Face CLI](https://huggingface.co/docs/hugging
 |Windows|`%USERPROFILE%\AppData\Local\LMStudio\models`|
 |Linux|`~/.local/share/LMStudio/models`|
 
-> Note: GGUF model repositories often contain weights for several flavors of the model. To avoid downloading all model flavors, specify the GGUF file name after the repository ID.
+Model repositories can contain weights for several flavors of the model. To avoid downloading all model flavors, specify the file name after the repository name.
 
 ```
 pip install --upgrade huggingface_hub
@@ -641,14 +630,10 @@ hf download <repo_id> <file_name> \
 
 ### Production Inference
 
-Once your trained model is available on the Hugging Face registry, many cloud providers can use the published files to pull your model and start a virtual machine that exposes a Chat API.
-
-After being uploaded, the model can be deployed for production inference using a variety of managed services:
+Once your trained model is available on the Hugging Face registry, cloud providers can pull your model and start a virtual machine that exposes a Chat API:
 
 - [Hugging Face Inference Endpoints](https://huggingface.co/docs/inference-endpoints/en/index)
 - [Amazon SageMaker](https://aws.amazon.com/sagemaker)
 - [Microsoft Foundry](https://ai.azure.com/catalog/publishers/hugging%20face,huggingface)
 - [Google Vertex AI](https://cloud.google.com/vertex-ai)
 - [Friendli Endpoints](https://friendli.ai/product/dedicated-endpoints)
-
-Once uploaded, the model can be loaded and tested using [inference.py](./inference.py), which verifies its behavior by sending sample prompts.
