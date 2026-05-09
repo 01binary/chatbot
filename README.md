@@ -43,7 +43,9 @@ Before we jump into integration and training, we’ll use prompts to evaluate mo
 
 ## Evaluating Models
 
-[Few-shot prompting](https://www.ibm.com/think/topics/few-shot-prompting) refers to the process of providing an AI model with a few examples of a task to guide its performance. This lets you quickly evaluate an LLM's behavior and capabilities before investing time in integration and training. The examples you use in few-shot prompts can later be used as the foundation for a training dataset.
+Few-shot prompting lets you quickly evaluate an LLM's behavior and capabilities before investing time in integration and training.
+
+[Few-shot prompting](https://www.ibm.com/think/topics/few-shot-prompting) is providing an AI model with a few examples of a task to guide its performance. The examples you use in few-shot prompts can later be used as the foundation for a training dataset.
 
 ### Exploring Models
 
