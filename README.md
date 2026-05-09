@@ -461,7 +461,7 @@ An example of a published dataset in ShareGPT format can be found here:
 
 The Hugging Face Generic format uses the same structure (a `.jsonl` file with one conversation per line) but with slightly different field names - `role` instead of `from` and `content` instead of `value`:
 
-| `from` value | Description       |
+| `role` value | Description       |
 |--------------|-------------------|
 | `system`     | System prompt     |
 | `user`       | User question     |
